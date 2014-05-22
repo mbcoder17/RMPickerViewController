@@ -46,7 +46,7 @@
 }
 
 @end
-
+//216
 #define RM_DATE_PICKER_HEIGHT_PORTRAIT 216
 #define RM_DATE_PICKER_HEIGHT_LANDSCAPE 162
 
@@ -72,6 +72,8 @@
 @property (nonatomic, strong) UIView *cancelAndSelectButtonSeperator;
 @property (nonatomic, strong) UIButton *cancelButton;
 @property (nonatomic, strong) UIButton *selectButton;
+@property (nonatomic, strong) UIButton *thirdButton;
+@property (nonatomic, strong) UIView *thirdButtonContainer;
 
 @property (nonatomic, strong) UIView *backgroundView;
 
@@ -218,6 +220,10 @@ static NSString *_localizedSelectTitle = @"Select";
     self.cancelAndSelectButtonSeperator = [[UIView alloc] initWithFrame:CGRectZero];
     self.cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     self.selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.thirdButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    
+    self.thirdButtonContainer = [[UIView alloc]initWithFrame:CGRectZero];
+    [self.thirdButtonContainer addSubview:self.thirdButton];
     
     //Add elements to their views
     [self.titleLabelContainer addSubview:self.titleLabel];
@@ -227,6 +233,8 @@ static NSString *_localizedSelectTitle = @"Select";
     [self.cancelAndSelectButtonContainer addSubview:self.cancelAndSelectButtonSeperator];
     [self.cancelAndSelectButtonContainer addSubview:self.cancelButton];
     [self.cancelAndSelectButtonContainer addSubview:self.selectButton];
+    //[self.view addSubview:self.thirdButton];
+    //[self.cancelAndSelectButtonContainer addSubview:self.thirdButton];
     
     //Setup properties of elements
     self.titleLabelContainer.backgroundColor = [UIColor whiteColor];
@@ -252,6 +260,11 @@ static NSString *_localizedSelectTitle = @"Select";
     self.cancelAndSelectButtonContainer.clipsToBounds = YES;
     self.cancelAndSelectButtonContainer.translatesAutoresizingMaskIntoConstraints = NO;
     
+    self.thirdButtonContainer.backgroundColor = [UIColor whiteColor];
+    self.thirdButtonContainer.layer.cornerRadius = 5;
+    self.thirdButtonContainer.clipsToBounds = YES;
+    self.thirdButtonContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    
     self.cancelAndSelectButtonSeperator.backgroundColor = [UIColor lightGrayColor];
     self.cancelAndSelectButtonSeperator.translatesAutoresizingMaskIntoConstraints = NO;
     
@@ -269,24 +282,43 @@ static NSString *_localizedSelectTitle = @"Select";
     self.selectButton.layer.cornerRadius = 5;
     self.selectButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self.selectButton setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+    
+    [self.thirdButton setTitle:@"Third Button" forState:UIControlStateNormal];
+    [self.thirdButton setTitleColor:[UIColor colorWithRed:0 green:122./255. blue:1 alpha:1] forState:UIControlStateNormal];
+    [self.thirdButton addTarget:self action:@selector(thirdButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    self.thirdButton.layer.cornerRadius = 5;
+    self.thirdButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.thirdButton setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+    
 }
 
 - (void)setupConstraints {
     UIView *pickerContainer = self.pickerContainer;
     UIView *cancelSelectContainer = self.cancelAndSelectButtonContainer;
+    UIView *thirdContainer = self.thirdButtonContainer;
     UIView *seperator = self.cancelAndSelectButtonSeperator;
     UIButton *cancel = self.cancelButton;
     UIButton *select = self.selectButton;
+    UIButton *third = self.thirdButton;
     UIPickerView *picker = self.picker;
     UIView *labelContainer = self.titleLabelContainer;
     UILabel *label = self.titleLabel;
     
-    NSDictionary *bindingsDict = NSDictionaryOfVariableBindings(cancelSelectContainer, seperator, pickerContainer, cancel, select, picker, labelContainer, label);
+    NSDictionary *bindingsDict = NSDictionaryOfVariableBindings(cancelSelectContainer, seperator, pickerContainer, thirdContainer, third, cancel, select, picker, labelContainer, label);
+    
+    
     
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(10)-[pickerContainer]-(10)-|" options:0 metrics:nil views:bindingsDict]];
+    
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(10)-[cancelSelectContainer]-(10)-|" options:0 metrics:nil views:bindingsDict]];
     
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[pickerContainer]-(10)-[cancelSelectContainer(44)]-(0)-|" options:0 metrics:nil views:bindingsDict]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(10)-[thirdContainer]-(10)-|" options:0 metrics:nil views:bindingsDict]];
+    
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[pickerContainer]-(10)-[cancelSelectContainer(44)]-(54)-|" options:0 metrics:nil views:bindingsDict]];
+    
+    //Mine
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[cancelSelectContainer]-(10)-[thirdContainer(44)]-(0)-|" options:0 metrics:nil views:bindingsDict]];//End
+    
     self.pickerHeightConstraint = [NSLayoutConstraint constraintWithItem:self.pickerContainer attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:0 constant:RM_DATE_PICKER_HEIGHT_PORTRAIT];
     [self.view addConstraint:self.pickerHeightConstraint];
     
@@ -309,6 +341,15 @@ static NSString *_localizedSelectTitle = @"Select";
     [self.cancelAndSelectButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[cancel]-(0)-|" options:0 metrics:nil views:bindingsDict]];
     [self.cancelAndSelectButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[seperator]-(0)-|" options:0 metrics:nil views:bindingsDict]];
     [self.cancelAndSelectButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[select]-(0)-|" options:0 metrics:nil views:bindingsDict]];
+    
+    //Mine
+    
+    [self.thirdButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(0)-[third]-(0)-|" options:0 metrics:nil views:bindingsDict]];
+    
+    [self.thirdButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[third]-(0)-|" options:0 metrics:nil views:bindingsDict]];
+    
+    //[self.cancelAndSelectButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[cancel]-(0)-[select]-(10)-[third]-(0)-|" options:0 metrics:nil views:bindingsDict]];
+    //[self.cancelAndSelectButtonContainer addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[third]-(0)-|" options:0 metrics:nil views:bindingsDict]];
 }
 
 - (void)viewDidLoad {
@@ -323,23 +364,28 @@ static NSString *_localizedSelectTitle = @"Select";
     
     [self.view addSubview:self.pickerContainer];
     [self.view addSubview:self.cancelAndSelectButtonContainer];
+    [self.view addSubview:self.thirdButtonContainer];
+    //[self.view addSubview:<#(UIView *)#>]
     
     [self setupConstraints];
     
     if(self.tintColor) {
         [self.cancelButton setTitleColor:self.tintColor forState:UIControlStateNormal];
         [self.selectButton setTitleColor:self.tintColor forState:UIControlStateNormal];
+        [self.thirdButton setTitleColor:self.tintColor forState:UIControlStateNormal];
     }
     
     if(self.backgroundColor) {
         self.titleLabelContainer.backgroundColor = self.backgroundColor;
         self.pickerContainer.backgroundColor = self.backgroundColor;
         self.cancelAndSelectButtonContainer.backgroundColor = self.backgroundColor;
+        self.thirdButtonContainer.backgroundColor = self.backgroundColor;
     }
     
     if(self.selectedBackgroundColor) {
         [self.cancelButton setBackgroundImage:[self imageWithColor:self.selectedBackgroundColor] forState:UIControlStateHighlighted];
         [self.selectButton setBackgroundImage:[self imageWithColor:self.selectedBackgroundColor] forState:UIControlStateHighlighted];
+        [self.thirdButton setBackgroundImage:[self imageWithColor:self.selectedBackgroundColor] forState:UIControlStateHighlighted];
     }
     
     if(!self.disableMotionEffects)
@@ -458,6 +504,7 @@ static NSString *_localizedSelectTitle = @"Select";
         
         [self.cancelButton setTitleColor:newTintColor forState:UIControlStateNormal];
         [self.selectButton setTitleColor:newTintColor forState:UIControlStateNormal];
+        [self.thirdButton setTitleColor:newTintColor forState:UIControlStateNormal];
     }
 }
 
@@ -468,6 +515,7 @@ static NSString *_localizedSelectTitle = @"Select";
         self.titleLabelContainer.backgroundColor = newBackgroundColor;
         self.pickerContainer.backgroundColor = newBackgroundColor;
         self.cancelAndSelectButtonContainer.backgroundColor = newBackgroundColor;
+        self.thirdButtonContainer.backgroundColor = newBackgroundColor;
     }
 }
 
@@ -485,6 +533,7 @@ static NSString *_localizedSelectTitle = @"Select";
         
         [self.cancelButton setBackgroundImage:[self imageWithColor:newSelectedBackgroundColor] forState:UIControlStateHighlighted];
         [self.selectButton setBackgroundImage:[self imageWithColor:newSelectedBackgroundColor] forState:UIControlStateHighlighted];
+        [self.thirdButton setBackgroundImage:[self imageWithColor:newSelectedBackgroundColor] forState:UIControlStateHighlighted];
     }
 }
 
@@ -549,6 +598,18 @@ static NSString *_localizedSelectTitle = @"Select";
 }
 
 - (IBAction)cancelButtonPressed:(id)sender {
+    if(!self.hasBeenDismissed) {
+        self.hasBeenDismissed = YES;
+        
+        [self.delegate pickerViewControllerDidCancel:self];
+        if (self.cancelBlock) {
+            self.cancelBlock(self);
+        }
+        [self performSelector:@selector(dismiss) withObject:nil afterDelay:0.1];
+    }
+}
+
+- (IBAction)thirdButtonPressed:(id)sender {
     if(!self.hasBeenDismissed) {
         self.hasBeenDismissed = YES;
         
